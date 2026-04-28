@@ -1,177 +1,240 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>คุณคือแมวแบบไหน 🐱</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: คุณคือใครใน โคนัน?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            padding: 30px 20px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+        }
+        h1 { font-size: 24px; color: #1a365d; margin-bottom: 10px; }
+        h2 { font-size: 18px; color: #2d3748; margin-bottom: 20px; }
+        p { font-size: 14px; color: #4a5568; line-height: 1.6; }
+        
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-family: 'Kanit', sans-serif;
+            transition: background 0.3s;
+        }
+        .btn:hover { background-color: #2b6cb0; }
+        
+        .choice-btn {
+            background-color: #edf2f7;
+            color: #2d3748;
+            border: 2px solid transparent;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            font-family: 'Kanit', sans-serif;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .choice-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #cbd5e0;
+        }
+        
+        .screen { display: none; animation: fadeIn 0.5s ease; }
+        .screen.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
-
-<style>
-body {
-  font-family: 'Kanit', sans-serif;
-  background: linear-gradient(135deg, #ffd6e0, #fff6f9);
-  text-align: center;
-}
-
-.container {
-  max-width: 520px;
-  margin: 50px auto;
-}
-
-.card {
-  background: white;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-
-button {
-  display: block;
-  width: 100%;
-  margin: 8px 0;
-  padding: 14px;
-  border: none;
-  background: #ff7aa2;
-  color: white;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  background: #ff4d88;
-  transform: scale(1.02);
-}
-
-.progress {
-  height: 8px;
-  background: #eee;
-  border-radius: 10px;
-  margin-bottom: 15px;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: #ff7aa2;
-}
-</style>
+        .progress-bar {
+            height: 6px;
+            background: #edf2f7;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #3182ce;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
-  <div class="card">
-    <div class="progress"><div class="progress-bar" id="bar"></div></div>
-    <h2 id="q">กดเริ่ม</h2>
-    <div id="choices"></div>
-    <button onclick="start()" id="startBtn">เริ่ม</button>
-  </div>
+    <div id="start-screen" class="screen active">
+        <h1>🕵️‍♂️ แบบทดสอบบุคลิกภาพ</h1>
+        <h2>คุณคือใครใน ยอดนักสืบจิ๋ว โคนัน?</h2>
+        <p>มาดูกันว่านิสัยและการตัดสินใจของคุณ ตรงกับตัวละครไหนในเรื่องมากที่สุด!</p>
+        <button class="btn" onclick="startQuiz()">เริ่มทำแบบทดสอบ</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+        <h2 id="question-text">คำถามจะแสดงที่นี่</h2>
+        <div id="choices-container"></div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2>ผลลัพธ์ของคุณคือ...</h2>
+        <h1 id="result-name" style="color: #c53030; font-size: 28px; margin: 10px 0;"></h1>
+        <p id="result-desc"></p>
+        <button class="btn" onclick="location.reload()">เล่นอีกครั้ง</button>
+    </div>
 </div>
 
 <script>
-const questions = [
-{
-q: "วันหยุดในฝันของคุณคือ?",
-choices: [
-{ text: "นอนทั้งวัน 😴", type: "lazy" },
-{ text: "ออกไปเที่ยว 🌈", type: "playful" },
-{ text: "อยู่บ้านเงียบ ๆ 🧘", type: "introvert" }
-]
-},
-{
-q: "ถ้ามีคนทักคุณก่อน?",
-choices: [
-{ text: "ดีใจมาก 💕", type: "cute" },
-{ text: "ตอบบ้างไม่ตอบบ้าง 😶", type: "introvert" },
-{ text: "ชวนคุยยาว 🔥", type: "playful" }
-]
-},
-{
-q: "สไตล์การกิน?",
-choices: [
-{ text: "อะไรก็ได้ 🐟", type: "lazy" },
-{ text: "เลือกของดีเท่านั้น 🍣", type: "boss" },
-{ text: "กินไปเล่นไป 😆", type: "playful" }
-]
-},
-{
-q: "เพื่อนมองคุณว่า?",
-choices: [
-{ text: "น่ารัก 🥺", type: "cute" },
-{ text: "ลึกลับ 🤫", type: "introvert" },
-{ text: "พลังเยอะ ⚡", type: "playful" }
-]
-},
-{
-q: "คุณจัดการปัญหาแบบไหน?",
-choices: [
-{ text: "หนี 😅", type: "lazy" },
-{ text: "สู้เต็มที่ 💪", type: "boss" },
-{ text: "คิดเงียบ ๆ 🧠", type: "introvert" }
-]
-}
-];
+    // 1. ข้อมูลตัวละคร (คะแนนจะถูกนำมาบวกในหมวดเหล่านี้)
+    const scores = { conan: 0, ran: 0, haibara: 0, kid: 0, heiji: 0 };
 
-let score = {
-lazy:0,
-playful:0,
-introvert:0,
-cute:0,
-boss:0
-};
+    const characterData = {
+        conan: { name: "เอโดงาวะ โคนัน", desc: "คุณเป็นคนฉลาด มีไหวพริบ ช่างสังเกต รักความยุติธรรมเป็นที่สุด และชอบพึ่งพาตัวเองในการแก้ปัญหา" },
+        ran: { name: "โมริ รัน", desc: "คุณเป็นคนจิตใจดี แคร์ความรู้สึกคนอื่น มีความอดทนสูง แต่เวลาโกรธหรือต้องปกป้องใคร คุณก็เข้มแข็งและพึ่งพาได้เสมอ" },
+        haibara: { name: "ไฮบาระ ไอ", desc: "คุณเป็นคนเยือกเย็น มีเหตุผล ดูภายนอกอาจจะนิ่งๆ เข้าถึงยาก แต่จริงๆ แล้วเป็นคนใจดีและเป็นห่วงคนรอบข้างมาก" },
+        kid: { name: "จอมโจรคิด", desc: "คุณเป็นคนรักสนุก มีเสน่ห์ ชอบสร้างสีสันและเซอร์ไพรส์ให้คนรอบข้าง มักจะมีความคิดนอกกรอบเสมอ" },
+        heiji: { name: "ฮัตโตริ เฮย์จิ", desc: "คุณเป็นคนเลือดร้อน ตรงไปตรงมา กระตือรือร้น รักเพื่อนพ้อง และชอบการแข่งขันเป็นชีวิตจิตใจ" }
+    };
 
-let current = 0;
+    // 2. ข้อมูลคำถาม
+    const questions = [
+        {
+            q: "เมื่อเจอเรื่องไม่คาดฝันหรือปัญหาเฉพาะหน้า คุณมักจะทำอย่างไร?",
+            choices: [
+                { text: "ตั้งสติ วิเคราะห์หาต้นตอของปัญหาทันที", char: "conan" },
+                { text: "สำรวจว่าคนรอบข้างปลอดภัยไหมก่อนเป็นอันดับแรก", char: "ran" },
+                { text: "ถอยออกมาสังเกตการณ์เงียบๆ ประเมินสถานการณ์", char: "haibara" },
+                { text: "พลิกวิกฤตให้เป็นโอกาส หรือหาทางแก้ไขแบบแหวกแนว", char: "kid" },
+                { text: "พุ่งลุยเข้าไปจัดการด้วยตัวเองอย่างรวดเร็ว", char: "heiji" }
+            ]
+        },
+        {
+            q: "ในวันหยุดว่างๆ คุณชอบทำกิจกรรมแบบไหน?",
+            choices: [
+                { text: "อ่านหนังสือสืบสวน หรือเล่นเกมไขปริศนา", char: "conan" },
+                { text: "ไปเที่ยวกับเพื่อนๆ หรือดูแลงานบ้าน", char: "ran" },
+                { text: "อยู่บ้านเงียบๆ หาข้อมูลสิ่งที่สนใจ หรือจิบกาแฟ", char: "haibara" },
+                { text: "ฝึกสกิลใหม่ๆ หรือเตรียมแผนไปแกล้ง/เซอร์ไพรส์เพื่อน", char: "kid" },
+                { text: "เล่นกีฬา ขี่มอเตอร์ไซค์ หรือออกไปหาของอร่อยกิน", char: "heiji" }
+            ]
+        },
+        {
+            q: "ถ้าเพื่อนสนิทของคุณกำลังตกอยู่ในอันตราย?",
+            choices: [
+                { text: "พุ่งเข้าไปช่วยทันทีโดยไม่คิดถึงชีวิตตัวเอง", char: "ran" }, // รัน/เฮย์จิ ก็ได้ ให้รัน
+                { text: "วางแผนอย่างรอบคอบที่สุดเพื่อช่วยพวกเขา", char: "conan" },
+                { text: "หาทางช่วยแบบลับๆ ไม่ให้ศัตรูไหวตัวทัน", char: "haibara" },
+                { text: "ปรากฏตัวเข้าไปช่วยแบบเท่ๆ พร้อมโชว์หลอกล่อ", char: "kid" },
+                { text: "โกรธจัดและตามล่าคนที่ทำร้ายเพื่อนให้ถึงที่สุด", char: "heiji" }
+            ]
+        },
+        {
+            q: "จุดเด่นในตัวคุณที่คุณภูมิใจที่สุดคืออะไร?",
+            choices: [
+                { text: "ความฉลาดหลักแหลมและตรรกะ", char: "conan" },
+                { text: "ความพยายามและความใส่ใจผู้อื่น", char: "ran" },
+                { text: "ความเยือกเย็นและการควบคุมอารมณ์", char: "haibara" },
+                { text: "ความลื่นไหล การปรับตัว และเสน่ห์", char: "kid" },
+                { text: "ความกล้าหาญและพลังงานที่ล้นเหลือ", char: "heiji" }
+            ]
+        }
+    ];
 
-function start() {
-document.getElementById("startBtn").style.display = "none";
-showQ();
-}
+    let currentQuestionIndex = 0;
 
-function showQ() {
-updateBar();
-let q = questions[current];
-document.getElementById("q").innerText = q.q;
+    // 3. ฟังก์ชันควบคุมการทำงาน
+    function startQuiz() {
+        document.getElementById('start-screen').classList.remove('active');
+        document.getElementById('quiz-screen').classList.add('active');
+        showQuestion();
+    }
 
-let html = "";
-q.choices.forEach(c=>{
-html += `<button onclick="choose('${c.type}')">${c.text}</button>`;
-});
-document.getElementById("choices").innerHTML = html;
-}
+    function showQuestion() {
+        const q = questions[currentQuestionIndex];
+        document.getElementById('question-text').innerText = `${currentQuestionIndex + 1}. ${q.q}`;
+        
+        // อัปเดต Progress Bar
+        const progress = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById('progress').style.width = `${progress}%`;
 
-function choose(type) {
-score[type]++;
-current++;
+        const choicesContainer = document.getElementById('choices-container');
+        choicesContainer.innerHTML = ''; // ล้างตัวเลือกเก่า
 
-if(current < questions.length){
-showQ();
-}else{
-result();
-}
-}
+        // สุ่มสลับตัวเลือก (จะได้ไม่จำเจ)
+        const shuffledChoices = q.choices.sort(() => Math.random() - 0.5);
 
-function updateBar(){
-document.getElementById("bar").style.width =
-(current / questions.length * 100) + "%";
-}
+        shuffledChoices.forEach(choice => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerText = choice.text;
+            btn.onclick = () => selectAnswer(choice.char);
+            choicesContainer.appendChild(btn);
+        });
+    }
 
-function result(){
-let r = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
+    function selectAnswer(charKey) {
+        scores[charKey]++; // เพิ่มคะแนนให้ตัวละครที่เลือก
+        currentQuestionIndex++;
 
-const map = {
-lazy:"🐱 แมวขี้เกียจ ชิล ๆ ใช้ชีวิตสบาย",
-playful:"🐱 แมวสายซน พลังงานล้นโลก",
-introvert:"🐱 แมวอินโทรเวิร์ต โลกส่วนตัวสูง",
-cute:"🐱 แมวขี้อ้อน ใครก็แพ้",
-boss:"🐱 แมวสายบอส เดินที่ไหนก็มีออร่า"
-};
+        if (currentQuestionIndex < questions.length) {
+            showQuestion();
+        } else {
+            calculateResult();
+        }
+    }
 
-document.getElementById("q").innerText = map[r];
-document.getElementById("choices").innerHTML =
-`<button onclick="location.reload()">เล่นอีกครั้ง</button>`;
-updateBar();
-}
+    function calculateResult() {
+        // อัปเดตหลอด Progress ให้เต็ม
+        document.getElementById('progress').style.width = '100%';
+
+        // หาตัวละครที่คะแนนสูงสุด
+        let highestChar = 'conan';
+        let maxScore = 0;
+        
+        for (const [char, score] of Object.entries(scores)) {
+            if (score > maxScore) {
+                maxScore = score;
+                highestChar = char;
+            }
+        }
+
+        // แสดงหน้าผลลัพธ์
+        setTimeout(() => {
+            document.getElementById('quiz-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+            
+            document.getElementById('result-name').innerText = characterData[highestChar].name;
+            document.getElementById('result-desc').innerText = characterData[highestChar].desc;
+        }, 300); // ดีเลย์เล็กน้อยให้ดูสมูท
+    }
 </script>
 
 </body>
