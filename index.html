@@ -11,72 +11,49 @@ body {
   font-family: 'Kanit', sans-serif;
   background: linear-gradient(135deg, #ffd6e0, #fff6f9);
   text-align: center;
-  margin: 0;
 }
 
 .container {
-  max-width: 500px;
-  margin: 60px auto;
-  padding: 20px;
+  max-width: 520px;
+  margin: 50px auto;
 }
 
 .card {
   background: white;
-  padding: 30px;
+  padding: 25px;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  animation: fadeIn 0.4s ease;
-}
-
-h1 {
-  margin-bottom: 10px;
 }
 
 button {
   display: block;
   width: 100%;
-  margin: 10px 0;
+  margin: 8px 0;
   padding: 14px;
   border: none;
   background: #ff7aa2;
   color: white;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
   transition: 0.2s;
 }
 
 button:hover {
-  transform: scale(1.03);
   background: #ff4d88;
+  transform: scale(1.02);
 }
 
 .progress {
   height: 8px;
   background: #eee;
   border-radius: 10px;
-  margin-bottom: 20px;
-  overflow: hidden;
+  margin-bottom: 15px;
 }
 
 .progress-bar {
   height: 100%;
   width: 0%;
   background: #ff7aa2;
-  transition: 0.3s;
-}
-
-.fade-out {
-  animation: fadeOut 0.3s forwards;
-}
-
-@keyframes fadeIn {
-  from {opacity:0; transform: translateY(10px);}
-  to {opacity:1; transform: translateY(0);}
-}
-
-@keyframes fadeOut {
-  to {opacity:0; transform: translateY(-10px);}
 }
 </style>
 </head>
@@ -84,10 +61,9 @@ button:hover {
 <body>
 
 <div class="container">
-  <div class="card" id="card">
+  <div class="card">
     <div class="progress"><div class="progress-bar" id="bar"></div></div>
-    <h1 id="title">คุณคือแมวแบบไหน 🐱</h1>
-    <p id="question">กดเริ่มเพื่อเล่น</p>
+    <h2 id="q">กดเริ่ม</h2>
     <div id="choices"></div>
     <button onclick="start()" id="startBtn">เริ่ม</button>
   </div>
@@ -95,103 +71,106 @@ button:hover {
 
 <script>
 const questions = [
-  {
-    q: "วันหยุดคุณทำอะไร?",
-    choices: [
-      { text: "นอน 😴", type: "lazy" },
-      { text: "ออกไปเที่ยว 🌈", type: "playful" }
-    ]
-  },
-  {
-    q: "มีคนเรียกคุณจะ?",
-    choices: [
-      { text: "ไปหาเลย 💕", type: "cute" },
-      { text: "เมิน 😼", type: "introvert" }
-    ]
-  },
-  {
-    q: "อาหารที่ชอบ?",
-    choices: [
-      { text: "อะไรก็ได้", type: "lazy" },
-      { text: "ต้องอร่อยเท่านั้น", type: "playful" }
-    ]
-  },
-  {
-    q: "คุณเป็นคนแบบไหน?",
-    choices: [
-      { text: "ขี้อ้อน", type: "cute" },
-      { text: "โลกส่วนตัวสูง", type: "introvert" }
-    ]
-  }
+{
+q: "วันหยุดในฝันของคุณคือ?",
+choices: [
+{ text: "นอนทั้งวัน 😴", type: "lazy" },
+{ text: "ออกไปเที่ยว 🌈", type: "playful" },
+{ text: "อยู่บ้านเงียบ ๆ 🧘", type: "introvert" }
+]
+},
+{
+q: "ถ้ามีคนทักคุณก่อน?",
+choices: [
+{ text: "ดีใจมาก 💕", type: "cute" },
+{ text: "ตอบบ้างไม่ตอบบ้าง 😶", type: "introvert" },
+{ text: "ชวนคุยยาว 🔥", type: "playful" }
+]
+},
+{
+q: "สไตล์การกิน?",
+choices: [
+{ text: "อะไรก็ได้ 🐟", type: "lazy" },
+{ text: "เลือกของดีเท่านั้น 🍣", type: "boss" },
+{ text: "กินไปเล่นไป 😆", type: "playful" }
+]
+},
+{
+q: "เพื่อนมองคุณว่า?",
+choices: [
+{ text: "น่ารัก 🥺", type: "cute" },
+{ text: "ลึกลับ 🤫", type: "introvert" },
+{ text: "พลังเยอะ ⚡", type: "playful" }
+]
+},
+{
+q: "คุณจัดการปัญหาแบบไหน?",
+choices: [
+{ text: "หนี 😅", type: "lazy" },
+{ text: "สู้เต็มที่ 💪", type: "boss" },
+{ text: "คิดเงียบ ๆ 🧠", type: "introvert" }
+]
+}
 ];
 
+let score = {
+lazy:0,
+playful:0,
+introvert:0,
+cute:0,
+boss:0
+};
+
 let current = 0;
-let score = { lazy:0, playful:0, cute:0, introvert:0 };
 
 function start() {
-  document.getElementById("startBtn").style.display = "none";
-  showQuestion();
+document.getElementById("startBtn").style.display = "none";
+showQ();
 }
 
-function showQuestion() {
-  updateProgress();
+function showQ() {
+updateBar();
+let q = questions[current];
+document.getElementById("q").innerText = q.q;
 
-  const q = questions[current];
-  const card = document.getElementById("card");
-
-  card.classList.add("fade-out");
-
-  setTimeout(() => {
-    card.classList.remove("fade-out");
-
-    document.getElementById("question").innerText = q.q;
-
-    const choicesDiv = document.getElementById("choices");
-    choicesDiv.innerHTML = "";
-
-    q.choices.forEach(choice => {
-      const btn = document.createElement("button");
-      btn.innerText = choice.text;
-      btn.onclick = () => choose(choice.type);
-      choicesDiv.appendChild(btn);
-    });
-
-  }, 300);
+let html = "";
+q.choices.forEach(c=>{
+html += `<button onclick="choose('${c.type}')">${c.text}</button>`;
+});
+document.getElementById("choices").innerHTML = html;
 }
 
 function choose(type) {
-  score[type]++;
-  current++;
+score[type]++;
+current++;
 
-  if (current < questions.length) {
-    showQuestion();
-  } else {
-    showResult();
-  }
+if(current < questions.length){
+showQ();
+}else{
+result();
+}
 }
 
-function updateProgress() {
-  const percent = (current / questions.length) * 100;
-  document.getElementById("bar").style.width = percent + "%";
+function updateBar(){
+document.getElementById("bar").style.width =
+(current / questions.length * 100) + "%";
 }
 
-function showResult() {
-  updateProgress();
+function result(){
+let r = Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
 
-  let result = Object.keys(score).reduce((a,b)=> score[a]>score[b]?a:b);
+const map = {
+lazy:"🐱 แมวขี้เกียจ ชิล ๆ ใช้ชีวิตสบาย",
+playful:"🐱 แมวสายซน พลังงานล้นโลก",
+introvert:"🐱 แมวอินโทรเวิร์ต โลกส่วนตัวสูง",
+cute:"🐱 แมวขี้อ้อน ใครก็แพ้",
+boss:"🐱 แมวสายบอส เดินที่ไหนก็มีออร่า"
+};
 
-  const results = {
-    lazy: "🐱 แมวขี้เกียจ นอนทั้งวัน แต่โคตรน่ารัก",
-    playful: "🐱 แมวสายซน พลังงานล้นโลก",
-    cute: "🐱 แมวขี้อ้อน ใครก็แพ้",
-    introvert: "🐱 แมวอินโทรเวิร์ต โลกส่วนตัวสูง"
-  };
-
-  document.getElementById("title").innerText = "ผลลัพธ์ของคุณ";
-  document.getElementById("question").innerText = results[result];
-  document.getElementById("choices").innerHTML = `
-    <button onclick="location.reload()">เล่นอีกครั้ง</button>
-  `;
+document.getElementById("q").innerText = map[r];
+document.getElementById("choices").innerHTML =
+`<button onclick="location.reload()">เล่นอีกครั้ง</button>`;
+updateBar();
 }
 </script>
 
