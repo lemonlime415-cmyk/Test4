@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>คุณคือแมวแบบไหน 🐱</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: 'Kanit', sans-serif;
+  background: linear-gradient(135deg, #ffd6e0, #fff6f9);
+  text-align: center;
+  margin: 0;
+}
+
+.container {
+  max-width: 500px;
+  margin: 60px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  animation: fadeIn 0.4s ease;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px;
+  border: none;
+  background: #ff7aa2;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.03);
+  background: #ff4d88;
+}
+
+.progress {
+  height: 8px;
+  background: #eee;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #ff7aa2;
+  transition: 0.3s;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  from {opacity:0; transform: translateY(10px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
+@keyframes fadeOut {
+  to {opacity:0; transform: translateY(-10px);}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <div class="card" id="card">
+    <div class="progress"><div class="progress-bar" id="bar"></div></div>
+    <h1 id="title">คุณคือแมวแบบไหน 🐱</h1>
+    <p id="question">กดเริ่มเพื่อเล่น</p>
+    <div id="choices"></div>
+    <button onclick="start()" id="startBtn">เริ่ม</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "วันหยุดคุณทำอะไร?",
+    choices: [
+      { text: "นอน 😴", type: "lazy" },
+      { text: "ออกไปเที่ยว 🌈", type: "playful" }
+    ]
+  },
+  {
+    q: "มีคนเรียกคุณจะ?",
+    choices: [
+      { text: "ไปหาเลย 💕", type: "cute" },
+      { text: "เมิน 😼", type: "introvert" }
+    ]
+  },
+  {
+    q: "อาหารที่ชอบ?",
+    choices: [
+      { text: "อะไรก็ได้", type: "lazy" },
+      { text: "ต้องอร่อยเท่านั้น", type: "playful" }
+    ]
+  },
+  {
+    q: "คุณเป็นคนแบบไหน?",
+    choices: [
+      { text: "ขี้อ้อน", type: "cute" },
+      { text: "โลกส่วนตัวสูง", type: "introvert" }
+    ]
+  }
+];
+
+let current = 0;
+let score = { lazy:0, playful:0, cute:0, introvert:0 };
+
+function start() {
+  document.getElementById("startBtn").style.display = "none";
+  showQuestion();
+}
+
+function showQuestion() {
+  updateProgress();
+
+  const q = questions[current];
+  const card = document.getElementById("card");
+
+  card.classList.add("fade-out");
+
+  setTimeout(() => {
+    card.classList.remove("fade-out");
+
+    document.getElementById("question").innerText = q.q;
+
+    const choicesDiv = document.getElementById("choices");
+    choicesDiv.innerHTML = "";
+
+    q.choices.forEach(choice => {
+      const btn = document.createElement("button");
+      btn.innerText = choice.text;
+      btn.onclick = () => choose(choice.type);
+      choicesDiv.appendChild(btn);
+    });
+
+  }, 300);
+}
+
+function choose(type) {
+  score[type]++;
+  current++;
+
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function updateProgress() {
+  const percent = (current / questions.length) * 100;
+  document.getElementById("bar").style.width = percent + "%";
+}
+
+function showResult() {
+  updateProgress();
+
+  let result = Object.keys(score).reduce((a,b)=> score[a]>score[b]?a:b);
+
+  const results = {
+    lazy: "🐱 แมวขี้เกียจ นอนทั้งวัน แต่โคตรน่ารัก",
+    playful: "🐱 แมวสายซน พลังงานล้นโลก",
+    cute: "🐱 แมวขี้อ้อน ใครก็แพ้",
+    introvert: "🐱 แมวอินโทรเวิร์ต โลกส่วนตัวสูง"
+  };
+
+  document.getElementById("title").innerText = "ผลลัพธ์ของคุณ";
+  document.getElementById("question").innerText = results[result];
+  document.getElementById("choices").innerHTML = `
+    <button onclick="location.reload()">เล่นอีกครั้ง</button>
+  `;
+}
+</script>
+
+</body>
+</html>
