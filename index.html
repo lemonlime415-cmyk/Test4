@@ -13,12 +13,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .container {
             background: white;
-            width: 90%;
+            width: 100%;
             max-width: 400px;
             border-radius: 16px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -86,6 +88,17 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+
+        /* แต่งรูปภาพผลลัพธ์ */
+        #result-img {
+            width: 100%;
+            max-width: 250px;
+            border-radius: 12px;
+            margin: 15px auto;
+            border: 3px solid #3182ce;
+            display: block;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 <body>
@@ -107,6 +120,9 @@
     <div id="result-screen" class="screen">
         <h2>ผลลัพธ์ของคุณคือ...</h2>
         <h1 id="result-name" style="color: #c53030; font-size: 28px; margin: 10px 0;"></h1>
+        
+        <img id="result-img" src="" alt="Character Image">
+
         <p id="result-desc"></p>
         <button class="btn" onclick="location.reload()">เล่นอีกครั้ง</button>
     </div>
@@ -116,12 +132,33 @@
     // 1. ข้อมูลตัวละคร (คะแนนจะถูกนำมาบวกในหมวดเหล่านี้)
     const scores = { conan: 0, ran: 0, haibara: 0, kid: 0, heiji: 0 };
 
+    // 💡 เปลี่ยนลิงก์ภาพตรงคำว่า img: "..." ให้เป็นลิงก์ภาพที่คุณต้องการได้เลย
     const characterData = {
-        conan: { name: "เอโดงาวะ โคนัน", desc: "คุณเป็นคนฉลาด มีไหวพริบ ช่างสังเกต รักความยุติธรรมเป็นที่สุด และชอบพึ่งพาตัวเองในการแก้ปัญหา" },
-        ran: { name: "โมริ รัน", desc: "คุณเป็นคนจิตใจดี แคร์ความรู้สึกคนอื่น มีความอดทนสูง แต่เวลาโกรธหรือต้องปกป้องใคร คุณก็เข้มแข็งและพึ่งพาได้เสมอ" },
-        haibara: { name: "ไฮบาระ ไอ", desc: "คุณเป็นคนเยือกเย็น มีเหตุผล ดูภายนอกอาจจะนิ่งๆ เข้าถึงยาก แต่จริงๆ แล้วเป็นคนใจดีและเป็นห่วงคนรอบข้างมาก" },
-        kid: { name: "จอมโจรคิด", desc: "คุณเป็นคนรักสนุก มีเสน่ห์ ชอบสร้างสีสันและเซอร์ไพรส์ให้คนรอบข้าง มักจะมีความคิดนอกกรอบเสมอ" },
-        heiji: { name: "ฮัตโตริ เฮย์จิ", desc: "คุณเป็นคนเลือดร้อน ตรงไปตรงมา กระตือรือร้น รักเพื่อนพ้อง และชอบการแข่งขันเป็นชีวิตจิตใจ" }
+        conan: { 
+            name: "เอโดงาวะ โคนัน", 
+            desc: "คุณเป็นคนฉลาด มีไหวพริบ ช่างสังเกต รักความยุติธรรมเป็นที่สุด และชอบพึ่งพาตัวเองในการแก้ปัญหา",
+            img: "https://placehold.co/400x400/1a365d/white?text=Conan" 
+        },
+        ran: { 
+            name: "โมริ รัน", 
+            desc: "คุณเป็นคนจิตใจดี แคร์ความรู้สึกคนอื่น มีความอดทนสูง แต่เวลาโกรธหรือต้องปกป้องใคร คุณก็เข้มแข็งและพึ่งพาได้เสมอ",
+            img: "https://placehold.co/400x400/e53e3e/white?text=Ran"
+        },
+        haibara: { 
+            name: "ไฮบาระ ไอ", 
+            desc: "คุณเป็นคนเยือกเย็น มีเหตุผล ดูภายนอกอาจจะนิ่งๆ เข้าถึงยาก แต่จริงๆ แล้วเป็นคนใจดีและเป็นห่วงคนรอบข้างมาก",
+            img: "https://placehold.co/400x400/805ad5/white?text=Haibara"
+        },
+        kid: { 
+            name: "จอมโจรคิด", 
+            desc: "คุณเป็นคนรักสนุก มีเสน่ห์ ชอบสร้างสีสันและเซอร์ไพรส์ให้คนรอบข้าง มักจะมีความคิดนอกกรอบเสมอ",
+            img: "https://placehold.co/400x400/edf2f7/2d3748?text=Kaito+Kid"
+        },
+        heiji: { 
+            name: "ฮัตโตริ เฮย์จิ", 
+            desc: "คุณเป็นคนเลือดร้อน ตรงไปตรงมา กระตือรือร้น รักเพื่อนพ้อง และชอบการแข่งขันเป็นชีวิตจิตใจ",
+            img: "https://placehold.co/400x400/2f855a/white?text=Heiji"
+        }
     };
 
     // 2. ข้อมูลคำถาม
@@ -149,7 +186,7 @@
         {
             q: "ถ้าเพื่อนสนิทของคุณกำลังตกอยู่ในอันตราย?",
             choices: [
-                { text: "พุ่งเข้าไปช่วยทันทีโดยไม่คิดถึงชีวิตตัวเอง", char: "ran" }, // รัน/เฮย์จิ ก็ได้ ให้รัน
+                { text: "พุ่งเข้าไปช่วยทันทีโดยไม่คิดถึงชีวิตตัวเอง", char: "ran" },
                 { text: "วางแผนอย่างรอบคอบที่สุดเพื่อช่วยพวกเขา", char: "conan" },
                 { text: "หาทางช่วยแบบลับๆ ไม่ให้ศัตรูไหวตัวทัน", char: "haibara" },
                 { text: "ปรากฏตัวเข้าไปช่วยแบบเท่ๆ พร้อมโชว์หลอกล่อ", char: "kid" },
@@ -231,11 +268,4 @@
             document.getElementById('quiz-screen').classList.remove('active');
             document.getElementById('result-screen').classList.add('active');
             
-            document.getElementById('result-name').innerText = characterData[highestChar].name;
-            document.getElementById('result-desc').innerText = characterData[highestChar].desc;
-        }, 300); // ดีเลย์เล็กน้อยให้ดูสมูท
-    }
-</script>
-
-</body>
-</html>
+            // เปลี่ยนข้อมู
